@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitIQ — Habit Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!--*Authentication*-->
+<div id="auth-layer" role="main" aria-label="Authentication">
+  <div class="auth-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="auth-card" role="dialog" aria-labelledby="auth-title">
+    <div class="auth-brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="url(#g1)" stroke-width="1.5"/>
+          <path d="M8 14 L11 17 L14 11 L17 15 L20 12" stroke="url(#g1)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6ee7b7"/>
+              <stop offset="1" stop-color="#3b82f6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span id="auth-title" class="brand-name">HabitIQ</span>
+    </div>
+    <p class="auth-tagline">Track smarter. Grow every day.</p>
+
+    <div class="tab-row" role="tablist" aria-label="Authentication tabs">
+      <button class="tab-btn active" id="tab-login" role="tab" aria-selected="true"
+              aria-controls="form-login" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" id="tab-signup" role="tab" aria-selected="false"
+              aria-controls="form-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login" class="auth-form" role="tabpanel" aria-labelledby="tab-login">
+      <div class="field-group">
+        <label class="field-label" for="login-user">Username</label>
+        <input class="auth-input" id="login-user" type="text" placeholder="your name" autocomplete="username">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="login-pass">Password</label>
+        <input class="auth-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="auth-err" id="login-err" role="alert" aria-live="polite"></div>
+      <button class="auth-btn" onclick="doLogin()">
+        <span>Login</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <p class="demo-hint">Demo: use any name + any 6-char password</p>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="form-signup" class="auth-form" style="display:none" role="tabpanel" aria-labelledby="tab-signup">
+      <div class="field-group">
+        <label class="field-label" for="su-user">Username</label>
+        <input class="auth-input" id="su-user" type="text" placeholder="choose a name" autocomplete="username">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="su-pass">Password <span class="field-hint">(min. 6 characters)</span></label>
+        <input class="auth-input" id="su-pass" type="password" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="su-pass2">Confirm Password</label>
+        <input class="auth-input" id="su-pass2" type="password" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <div class="auth-err" id="signup-err" role="alert" aria-live="polite"></div>
+      <button class="auth-btn" onclick="doSignup()">
+        <span>Create Account</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!--*APP*-->
+<div id="app" aria-label="HabitIQ Dashboard">
+
+  <!-- HEADER -->
+  <header class="header" role="banner">
+    <div class="header-brand">
+      <div class="brand-icon-sm" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="url(#gh)" stroke-width="1.5"/>
+          <path d="M8 14 L11 17 L14 11 L17 15 L20 12" stroke="url(#gh)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="gh" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6ee7b7"/>
+              <stop offset="1" stop-color="#3b82f6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="header-logo">HabitIQ</span>
+    </div>
+    <nav class="header-user" aria-label="User menu">
+      <div class="avatar" id="avatar-initials" aria-hidden="true">U</div>
+      <span id="header-username" class="username-text">User</span>
+      <button class="logout-btn" onclick="doLogout()" aria-label="Log out">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h3M9 10l3-3-3-3M13 7H5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Logout
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-grid" id="main-content">
+
+    <!-- DAILY DATA -->
+    <section class="card daily-data" aria-labelledby="title-daily">
+      <div class="card-header">
+        <div class="card-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 2v2M11 2v2M2 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <h2 class="card-title" id="title-daily">Daily Data</h2>
+      </div>
+      <div class="input-stack">
+        <div class="field-group">
+          <label class="field-label" for="date">Date</label>
+          <input type="date" id="date" class="app-input" aria-label="Select date">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="study">Study Hours</label>
+          <input type="number" id="study" class="app-input" placeholder="0 – 24" min="0" max="24" step="0.5" aria-label="Study hours">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="sleep">Sleep Hours</label>
+          <input type="number" id="sleep" class="app-input" placeholder="0 – 24" min="0" max="24" step="0.5" aria-label="Sleep hours">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="screen">Screen Time (hrs)</label>
+          <input type="number" id="screen" class="app-input" placeholder="0 – 24" min="0" max="24" step="0.5" aria-label="Screen time in hours">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="productivity">Productivity Score <span class="field-hint">(1–10)</span></label>
+          <input type="number" id="productivity" class="app-input" placeholder="1 – 10" min="1" max="10" step="0.5" aria-label="Productivity score from 1 to 10">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="addData()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Add Entry
+        </button>
+        <button class="btn-secondary" onclick="exportData()" aria-label="Export data as JSON">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export
+        </button>
+      </div>
+    </section>
+
+    <!-- SMART INSIGHTS -->
+    <section class="card smart-insights" aria-labelledby="title-insights">
+      <div class="card-header">
+        <div class="card-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <h2 class="card-title" id="title-insights">Smart Insights</h2>
+      </div>
+      <div class="corr-grid" role="list" aria-label="Correlation statistics">
+        <div class="corr-chip" role="listitem">
+          <div class="corr-label">Study ↔ Productivity</div>
+          <div class="corr-val corr-neu" id="corr-study" aria-live="polite">—</div>
+        </div>
+        <div class="corr-chip" role="listitem">
+          <div class="corr-label">Sleep ↔ Productivity</div>
+          <div class="corr-val corr-neu" id="corr-sleep" aria-live="polite">—</div>
+        </div>
+        <div class="corr-chip" role="listitem">
+          <div class="corr-label">Screen ↔ Productivity</div>
+          <div class="corr-val corr-neu" id="corr-screen" aria-live="polite">—</div>
+        </div>
+      </div>
+      <div class="insight-body" id="insights" aria-live="polite" aria-label="AI insights text">
+        Add at least 3 days of data to unlock smart insights...
+      </div>
+    </section>
+
+    <!-- TO-DO -->
+    <section class="card todo-panel" aria-labelledby="title-todo">
+      <div class="card-header">
+        <div class="card-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2 class="card-title" id="title-todo">Tasks</h2>
+        <div class="todo-meta">
+          <span id="todo-count" aria-live="polite">0 tasks</span>
+          <span class="todo-sep" aria-hidden="true">·</span>
+          <span id="todo-done-count" aria-live="polite">0 done</span>
+        </div>
+      </div>
+      <div class="todo-input-row">
+        <input class="todo-input" id="todo-input" type="text" placeholder="Add a task..."
+               aria-label="New task"
+               onkeydown="if(event.key==='Enter') addTodo()">
+        <button class="todo-add-btn" onclick="addTodo()" aria-label="Add task">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="todo-progress" role="progressbar" aria-label="Task completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar-wrapper">
+        <div class="todo-bar" id="todo-bar"></div>
+      </div>
+      <ul class="todo-list" id="todo-list" aria-label="Task list"></ul>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="card filters-card" aria-labelledby="title-filters">
+      <div class="card-header">
+        <div class="card-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <h2 class="card-title" id="title-filters">Filter Range</h2>
+      </div>
+      <div class="filter-group" role="group" aria-label="Date filter options">
+        <button class="filter-btn active" id="f-all" onclick="setFilter('all')" aria-pressed="true">All Time</button>
+        <button class="filter-btn" id="f-7" onclick="setFilter(7)" aria-pressed="false">Last 7 Days</button>
+        <button class="filter-btn" id="f-30" onclick="setFilter(30)" aria-pressed="false">Last 30 Days</button>
+      </div>
+      <div class="stats-mini" aria-label="Summary statistics">
+        <div class="stat-mini-item">
+          <div class="stat-mini-val" id="stat-entries">0</div>
+          <div class="stat-mini-label">Entries</div>
+        </div>
+        <div class="stat-mini-item">
+          <div class="stat-mini-val" id="stat-avg-prod">—</div>
+          <div class="stat-mini-label">Avg Score</div>
+        </div>
+        <div class="stat-mini-item">
+          <div class="stat-mini-val" id="stat-streak">0</div>
+          <div class="stat-mini-label">Day Streak</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HEATMAP -->
+    <section class="card heatmap-card" aria-labelledby="title-heatmap">
+      <div class="card-header">
+        <div class="card-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+        </div>
+        <h2 class="card-title" id="title-heatmap">Productivity Heatmap</h2>
+      </div>
+      <div id="heatmap" class="heatmap-grid" role="list" aria-label="Productivity heatmap"></div>
+      <div class="heatmap-legend" aria-label="Heatmap color legend">
+        <span class="legend-label">Low</span>
+        <div class="legend-swatch" style="background:#ef4444" aria-label="Low productivity"></div>
+        <div class="legend-swatch" style="background:#f97316" aria-label="Below average"></div>
+        <div class="legend-swatch" style="background:#eab308" aria-label="Average"></div>
+        <div class="legend-swatch" style="background:#84cc16" aria-label="Good"></div>
+        <div class="legend-swatch" style="background:#22c55e" aria-label="High productivity"></div>
+        <span class="legend-label">High</span>
+      </div>
+    </section>
+
+    <!-- CORRELATION CHART -->
+    <section class="card correlation-card" aria-labelledby="title-corr">
+      <div class="card-header">
+        <div class="card-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-5 3 3 5-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2 class="card-title" id="title-corr">Habit Correlation</h2>
+      </div>
+      <div class="chart-wrap" style="height:200px">
+        <canvas id="correlationChart" role="img" aria-label="Bar chart showing correlation of study, sleep, and screen time with productivity">No data yet.</canvas>
+      </div>
+    </section>
+
+    <!-- TREND CHARTS -->
+    <div class="trend-row" role="region" aria-label="Trend charts">
+      <section class="card" aria-labelledby="title-line">
+        <div class="card-header">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 2 5-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h2 class="card-title" id="title-line">Productivity Trend</h2>
+        </div>
+        <div class="chart-wrap" style="height:175px">
+          <canvas id="lineChart" role="img" aria-label="Line chart of productivity over time">No data yet.</canvas>
+        </div>
+      </section>
+      <section class="card" aria-labelledby="title-dual">
+        <div class="card-header">
+          <div class="card-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10l4-4 3 4 5-7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h2 class="card-title" id="title-dual">Sleep vs Study</h2>
+        </div>
+        <div class="chart-wrap" style="height:175px">
+          <canvas id="dualChart" role="img" aria-label="Dual line chart comparing sleep and study hours over time">No data yet.</canvas>
+        </div>
+      </section>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
